@@ -1,5 +1,9 @@
 function f(name: string) {
-    console.log(`Hello ${name}`)
+    const user = {
+        fname: 'John',
+    }
+    const ffname = user.fname
+    console.log(`Hello ${name} ${ffname}`)
 }
 
 f('World')
