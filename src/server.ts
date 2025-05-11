@@ -1,5 +1,5 @@
-function f(name: string){
-    console.log(`Hello ${name}`);
+function f(name: string) {
+    console.log(`Hello ${name}`)
 }
 
-f("World");
+f('World')
