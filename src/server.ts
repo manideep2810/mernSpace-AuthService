@@ -4,6 +4,8 @@ import app from './app'
 import { Config } from './config'
 import logger from './config/logger'
 
+console.log(process.env.NODE_ENV)
+
 const startServer = () => {
     const { PORT } = Config
     try {
