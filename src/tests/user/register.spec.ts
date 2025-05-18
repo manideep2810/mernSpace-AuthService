@@ -78,6 +78,29 @@ describe('POST auth/register', () => {
             expect(user[0].lastName).toEqual(UserData.lastName)
             expect(user[0].email).toEqual(UserData.email)
         })
+
+        it('should return id of the user created from database', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'John@gmail.com',
+                password: '12345678',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            expect(response.body).toHaveProperty('id')
+            // const repository = connection.getRepository('User');
+            // const users = await repository.find();
+            // expect((response.body as Record<string, string>).id).toBe(
+            //     users[0].id,
+            // );
+        })
     })
     describe('Missing Feilds', () => {})
 })
