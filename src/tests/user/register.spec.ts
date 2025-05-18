@@ -2,7 +2,7 @@ import app from '../../app'
 import request from 'supertest'
 import { DataSource } from 'typeorm'
 import { AppDataSource } from '../../config/data-source'
-import { truncateTables } from '../utils/index'
+import { ROLES } from '../../constants'
 
 describe('POST auth/register', () => {
     let connection: DataSource
@@ -12,7 +12,8 @@ describe('POST auth/register', () => {
     })
 
     beforeEach(async () => {
-        await truncateTables(connection)
+        await connection.dropDatabase()
+        await connection.synchronize()
     })
 
     afterAll(async () => {
@@ -95,11 +96,33 @@ describe('POST auth/register', () => {
 
             // Assert
             expect(response.body).toHaveProperty('id')
-            // const repository = connection.getRepository('User');
-            // const users = await repository.find();
-            // expect((response.body as Record<string, string>).id).toBe(
-            //     users[0].id,
-            // );
+            const repository = connection.getRepository('User')
+            const users = await repository.find()
+            expect((response.body as Record<string, string>).id).toBe(
+                users[0].id,
+            )
+        })
+
+        it('should assign a customer role', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'John@gmail.com',
+                password: '12345678',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            expect(response.body).toHaveProperty('id')
+            const repository = connection.getRepository('User')
+            const users = await repository.find()
+            expect(users[0]).toHaveProperty('role')
+            expect(users[0].role).toBe(ROLES.CUSTOMER)
         })
     })
     describe('Missing Feilds', () => {})
