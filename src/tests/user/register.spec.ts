@@ -124,6 +124,49 @@ describe('POST auth/register', () => {
             expect(users[0]).toHaveProperty('role')
             expect(users[0].role).toBe(ROLES.CUSTOMER)
         })
+
+        it('should store the hashed password in database', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'John@gmail.com',
+                password: '12345678',
+            }
+
+            // Act
+            await request(app).post('/auth/register').send(UserData)
+
+            // Assert
+
+            const repository = connection.getRepository('User')
+            const users = await repository.find()
+            expect(users[0].password).not.toBe(UserData.password)
+            expect(users[0].password).toHaveLength(60)
+            expect(users[0].password).toMatch(/^\$2b\$\d+\$/)
+        })
+
+        it('should return 400 status code if email already exists', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'John@gmail.com',
+                password: '12345678',
+            }
+            const repository = connection.getRepository('User')
+            await repository.save({ ...UserData, role: ROLES.CUSTOMER })
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            const users = await repository.find()
+            expect(response.statusCode).toBe(400)
+            expect(users).toHaveLength(1)
+        })
     })
     describe('Missing Feilds', () => {})
 })
