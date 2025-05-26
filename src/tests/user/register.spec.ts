@@ -168,5 +168,27 @@ describe('POST auth/register', () => {
             expect(users).toHaveLength(1)
         })
     })
-    describe('Missing Feilds', () => {})
+
+    describe('Missing Feilds', () => {
+        it('should return 400 status code if email Field is Missing', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: '',
+                password: '12345678',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            const repository = connection.getRepository('User')
+            expect(response.statusCode).toBe(400)
+            const users = await repository.find()
+            expect(users).toHaveLength(0)
+        })
+    })
 })
