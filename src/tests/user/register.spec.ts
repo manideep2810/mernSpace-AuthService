@@ -190,6 +190,69 @@ describe('POST auth/register', () => {
             const users = await repository.find()
             expect(users).toHaveLength(0)
         })
+
+        it('should return 400 status code if firstName Field is Missing', async () => {
+            // Arrange
+            const UserData = {
+                firstName: '',
+                lastName: 'Doe',
+                email: 'Manideepnaidu@gmail.com',
+                password: '12345678',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            const repository = connection.getRepository('User')
+            expect(response.statusCode).toBe(400)
+            const users = await repository.find()
+            expect(users).toHaveLength(0)
+        })
+
+        it('should return 400 status code if lastName Field is Missing', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: '',
+                email: 'Manideepnaidu@gmail.com',
+                password: '12345678',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            const repository = connection.getRepository('User')
+            expect(response.statusCode).toBe(400)
+            const users = await repository.find()
+            expect(users).toHaveLength(0)
+        })
+
+        it('should return 400 status code if password Field is Missing', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'Manideepnaidu@gmail.com',
+                password: '',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            const repository = connection.getRepository('User')
+            expect(response.statusCode).toBe(400)
+            const users = await repository.find()
+            expect(users).toHaveLength(0)
+        })
     })
 
     describe('Request Feilds are not in proper Format', () => {
@@ -209,6 +272,27 @@ describe('POST auth/register', () => {
             const repository = connection.getRepository('User')
             const users = await repository.find()
             expect(users[0].email).toBe('manideepnaidu@gmail.com')
+        })
+
+        it('should return 400 status code if email is not valid', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'Hello',
+                password: '12345678',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            const repository = connection.getRepository('User')
+            expect(response.statusCode).toBe(400)
+            const users = await repository.find()
+            expect(users).toHaveLength(0)
         })
     })
 })
