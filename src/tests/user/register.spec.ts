@@ -191,4 +191,24 @@ describe('POST auth/register', () => {
             expect(users).toHaveLength(0)
         })
     })
+
+    describe('Request Feilds are not in proper Format', () => {
+        it('Should Trim email feild while storing in database', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: ' manideepnaidu@gmail.com ',
+                password: '12345678',
+            }
+
+            // Act
+            await request(app).post('/auth/register').send(UserData)
+
+            // Assert
+            const repository = connection.getRepository('User')
+            const users = await repository.find()
+            expect(users[0].email).toBe('manideepnaidu@gmail.com')
+        })
+    })
 })
