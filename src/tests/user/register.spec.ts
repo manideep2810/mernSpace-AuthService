@@ -3,6 +3,8 @@ import request from 'supertest'
 import { DataSource } from 'typeorm'
 import { AppDataSource } from '../../config/data-source'
 import { ROLES } from '../../constants'
+import { IncomingHttpHeaders } from 'http'
+import { isJWT } from '../utils'
 
 describe('POST auth/register', () => {
     let connection: DataSource
@@ -167,6 +169,42 @@ describe('POST auth/register', () => {
             expect(response.statusCode).toBe(400)
             expect(users).toHaveLength(1)
         })
+
+        it('should return access token and refresh token', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'John@gmail.com',
+                password: '12345678',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            let accessToken = null
+            let refreshToken = null
+            const headers = response.headers as IncomingHttpHeaders
+            const cookies = headers['set-cookie'] ?? []
+            cookies.forEach((cookie) => {
+                if (cookie.startsWith('accessToken=')) {
+                    accessToken = cookie.split(';')[0].split('=')[1]
+                }
+
+                if (cookie.startsWith('refreshToken=')) {
+                    refreshToken = cookie.split(';')[0].split('=')[1]
+                }
+            })
+
+            expect(accessToken).not.toBeNull()
+            expect(refreshToken).not.toBeNull()
+
+            expect(isJWT(accessToken)).toBeTruthy()
+            expect(isJWT(refreshToken)).toBeTruthy()
+        })
     })
 
     describe('Missing Feilds', () => {
@@ -281,6 +319,27 @@ describe('POST auth/register', () => {
                 lastName: 'Doe',
                 email: 'Hello',
                 password: '12345678',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            const repository = connection.getRepository('User')
+            expect(response.statusCode).toBe(400)
+            const users = await repository.find()
+            expect(users).toHaveLength(0)
+        })
+
+        it('should return 400 status code if password length is less than 8', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'manideepnaidu@gmail.com',
+                password: '1234567',
             }
 
             // Act
