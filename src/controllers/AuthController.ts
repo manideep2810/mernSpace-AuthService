@@ -1,18 +1,18 @@
-import fs from 'fs'
-import path from 'path'
 import { NextFunction, Response } from 'express'
-import { JwtPayload, sign } from 'jsonwebtoken'
+import { JwtPayload } from 'jsonwebtoken'
 import { UserService } from '../services/userService'
 import { RegisterUserRequest } from '../types/index'
 import { Logger } from 'winston'
 import { validationResult } from 'express-validator'
-import createHttpError from 'http-errors'
-import { Config } from '../config'
+import { AppDataSource } from '../config/data-source'
+import { RefreshToken } from '../entity/RefreshToken'
+import { TokenService } from '../services/tokenService'
 
 export class AuthController {
     constructor(
         private userService: UserService,
         private logger: Logger,
+        private tokenService: TokenService,
     ) {}
     async register(
         req: RegisterUserRequest,
@@ -47,28 +47,19 @@ export class AuthController {
                 role: user.role,
             }
 
-            let privateKey: Buffer
-            try {
-                privateKey = fs.readFileSync(
-                    path.join(__dirname, '../../certs/private.pem'),
-                )
-            } catch (error) {
-                const err = createHttpError(500, 'Private key not found')
-                this.logger.error('Private key not found', { error: error })
-                next(err)
-                return
-            }
+            const accessToken = this.tokenService.generateAccessToken(payload)
 
-            const accessToken = sign(payload, privateKey, {
-                algorithm: 'RS256',
-                expiresIn: '1h',
-                issuer: 'auth-service',
+            const MS_IN_YEAR = 60 * 60 * 1000 * 24 * 365
+            const expiresAt = new Date(Date.now() + MS_IN_YEAR)
+            const RefreshTokenRepo = AppDataSource.getRepository(RefreshToken)
+            const newRefreshToken = await RefreshTokenRepo.save({
+                expiresAt: expiresAt,
+                user: user,
             })
 
-            const refreshToken = sign(payload, Config.REFRESH_TOKEN_SECRET!, {
-                algorithm: 'HS256',
-                expiresIn: '1y',
-                issuer: 'auth-service',
+            const refreshToken = this.tokenService.generateRefreshToken({
+                ...payload,
+                id: String(newRefreshToken.id),
             })
 
             res.cookie('accessToken', accessToken, {

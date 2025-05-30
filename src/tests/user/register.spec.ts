@@ -205,6 +205,36 @@ describe('POST auth/register', () => {
             expect(isJWT(accessToken)).toBeTruthy()
             expect(isJWT(refreshToken)).toBeTruthy()
         })
+
+        it('should return access token and refresh token', async () => {
+            // Arrange
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'John@gmail.com',
+                password: '12345678',
+            }
+
+            // Act
+            const response = await request(app)
+                .post('/auth/register')
+                .send(UserData)
+
+            // Assert
+            const refreshTokenRepo = connection.getRepository('RefreshToken')
+            const refreshTokens = await refreshTokenRepo.find()
+            expect(refreshTokens).toHaveLength(1)
+
+            const tokens = await refreshTokenRepo
+                .createQueryBuilder('refreshToken')
+                .where('refreshToken.userId = :userId', {
+                    userId: (response.body as Record<string, string>).id,
+                })
+                .getMany()
+
+            // console.log(tokens);
+            expect(tokens).toHaveLength(1)
+        })
     })
 
     describe('Missing Feilds', () => {

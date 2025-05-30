@@ -2,6 +2,7 @@ import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import { User } from '../entity/User'
 import { Config } from '.'
+import { RefreshToken } from '../entity/RefreshToken'
 
 // console.log(Config.DB_PASSWORD)
 
@@ -14,7 +15,7 @@ export const AppDataSource = new DataSource({
     database: Config.DB_NAME,
     synchronize: false,
     logging: false,
-    entities: [User],
+    entities: [User, RefreshToken],
     migrations: [],
     subscribers: [],
 })
