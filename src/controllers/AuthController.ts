@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express'
 import { JwtPayload } from 'jsonwebtoken'
 import { UserService } from '../services/userService'
-import { RegisterUserRequest } from '../types/index'
+import { AuthRequest, RegisterUserRequest } from '../types/index'
 import { Logger } from 'winston'
 import { validationResult } from 'express-validator'
 import { TokenService } from '../services/tokenService'
@@ -158,5 +158,12 @@ export class AuthController {
             next(err)
             return
         }
+    }
+
+    async self(req: AuthRequest, res: Response) {
+        // console.log(req.auth);
+        // console.log('hello from self');
+        const user = await this.userService.findById(Number(req.auth.sub))
+        res.json({ ...user, password: undefined })
     }
 }

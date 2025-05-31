@@ -12,12 +12,14 @@ const {
     DB_PASSWORD,
     DB_USERNAME,
     REFRESH_TOKEN_SECRET,
+    JWKS_URI,
 } = process.env
 
 // console.log(__dirname, `../../.env.${process.env.NODE_ENV}`);
 
 // console.log(process.env.PORT);
 // console.log(DB_PASSWORD, typeof DB_PASSWORD)
+// console.log(JWKS_URI);
 
 export const Config = {
     PORT,
@@ -28,4 +30,5 @@ export const Config = {
     DB_PASSWORD,
     DB_USERNAME,
     REFRESH_TOKEN_SECRET,
+    JWKS_URI,
 }
