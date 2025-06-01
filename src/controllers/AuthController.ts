@@ -166,4 +166,57 @@ export class AuthController {
         const user = await this.userService.findById(Number(req.auth.sub))
         res.json({ ...user, password: undefined })
     }
+
+    async refresh(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const payload: JwtPayload = {
+                sub: String(req.auth.sub),
+                role: req.auth.role,
+            }
+
+            const user = await this.userService.findById(Number(req.auth.sub))
+
+            if (!user) {
+                const err = createHttpError(401, 'user does not exists')
+                next(err)
+                return
+            }
+
+            const accessToken = this.tokenService.generateAccessToken(payload)
+
+            const newRefreshToken =
+                await this.tokenService.persistRefreshToken(user)
+
+            await this.tokenService.deleteRefreshToken(Number(req.auth.id))
+
+            const refreshToken = this.tokenService.generateRefreshToken({
+                ...payload,
+                id: String(newRefreshToken.id),
+            })
+
+            res.cookie('accessToken', accessToken, {
+                httpOnly: true,
+                maxAge: 60 * 60 * 1000,
+                domain: 'localhost',
+                sameSite: 'strict',
+            })
+
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                maxAge: 60 * 60 * 1000 * 24 * 365,
+                domain: 'localhost',
+                sameSite: 'strict',
+            })
+
+            this.logger.info('User has been logged in', { id: user.id })
+
+            res.status(200).json({
+                id: user.id,
+            })
+        } catch (err) {
+            next(err)
+            return
+        }
+        res.json({})
+    }
 }
