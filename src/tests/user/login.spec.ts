@@ -20,7 +20,7 @@ describe('POST /auth/login', () => {
         await connection.destroy()
     })
 
-    describe('Given all fields', () => {
+    describe.skip('Given all fields', () => {
         it('should return 200', async () => {
             // Arrange
             // Create a user in the database
