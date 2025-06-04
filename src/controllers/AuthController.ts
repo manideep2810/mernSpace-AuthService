@@ -7,6 +7,7 @@ import { validationResult } from 'express-validator'
 import { TokenService } from '../services/tokenService'
 import createHttpError from 'http-errors'
 import { CredentailService } from '../services/credentialService'
+import { ROLES } from '../constants'
 
 export class AuthController {
     constructor(
@@ -38,6 +39,7 @@ export class AuthController {
                 lastName,
                 email,
                 password,
+                role: ROLES.CUSTOMER,
             })
             this.logger.info('User has been registered succesfully', {
                 id: user.id,

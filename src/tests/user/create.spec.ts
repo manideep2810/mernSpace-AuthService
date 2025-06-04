@@ -55,8 +55,34 @@ describe('POST /users', () => {
             const users = await usersRepository.find()
 
             expect(users).toHaveLength(1)
-            expect(users[0].role).toBe(ROLES.MANAGER)
             expect(users[0].email).toBe(UserData.email)
+        })
+
+        it('should create user of role manager only', async () => {
+            const adminToken = jwks.token({
+                sub: '1',
+                role: ROLES.ADMIN,
+            })
+
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'John@gmail.com',
+                password: '12345678',
+                tenantId: 1,
+            }
+
+            await request(app)
+                .post('/users')
+                .set('Cookie', [`accessToken=${adminToken}`])
+                .send(UserData)
+
+            // console.log(response.body);
+            const usersRepository = connection.getRepository(User)
+            const users = await usersRepository.find()
+
+            expect(users).toHaveLength(1)
+            expect(users[0].role).toBe(ROLES.MANAGER)
         })
     })
 })
