@@ -6,7 +6,7 @@ import { ROLES } from '../constants'
 export class UserController {
     constructor(private userService: UserService) {}
     async create(req: CreateUserRequest, res: Response, next: NextFunction) {
-        const { firstName, lastName, email, password } = req.body
+        const { firstName, lastName, email, password, tenantId } = req.body
         try {
             const user = await this.userService.create({
                 firstName,
@@ -14,6 +14,7 @@ export class UserController {
                 email,
                 password,
                 role: ROLES.MANAGER,
+                tenantId,
             })
             res.status(200).json({ id: user.id })
         } catch (error) {

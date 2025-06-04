@@ -17,7 +17,7 @@ const usersController = new UserController(userService)
 router.post(
     '/',
     authenticate,
-    canAccess([ROLES.ADMIN]),
+    canAccess([ROLES.ADMIN, ROLES.CUSTOMER]),
     registerValidators,
     async (req: Request, res: Response, next: NextFunction) =>
         await usersController.create(req, res, next),
