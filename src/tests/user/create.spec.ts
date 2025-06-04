@@ -1,0 +1,62 @@
+import { DataSource } from 'typeorm'
+import { AppDataSource } from '../../config/data-source'
+import request from 'supertest'
+import app from '../../app'
+import createJWKMock from 'mock-jwks'
+import { ROLES } from '../../constants'
+import { User } from '../../entity/User'
+
+describe('POST /users', () => {
+    let connection: DataSource
+    let jwks: ReturnType<typeof createJWKMock>
+
+    beforeAll(async () => {
+        jwks = createJWKMock('http://localhost:5501')
+        connection = await AppDataSource.initialize()
+    })
+
+    beforeEach(async () => {
+        jwks.start()
+        // await new Promise(res => setTimeout(res, 10000));
+        await connection.dropDatabase()
+        await connection.synchronize()
+    })
+
+    afterEach(() => {
+        jwks.stop()
+    })
+
+    afterAll(async () => {
+        await connection.destroy()
+    })
+
+    describe('Given all fields', () => {
+        it('should persist the user in database', async () => {
+            const adminToken = jwks.token({
+                sub: '1',
+                role: ROLES.ADMIN,
+            })
+
+            const UserData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'John@gmail.com',
+                password: '12345678',
+                tenantId: 1,
+            }
+
+            await request(app)
+                .post('/users')
+                .set('Cookie', [`accessToken=${adminToken}`])
+                .send(UserData)
+
+            // console.log(response.body);
+            const usersRepository = connection.getRepository(User)
+            const users = await usersRepository.find()
+
+            expect(users).toHaveLength(1)
+            expect(users[0].role).toBe(ROLES.MANAGER)
+            expect(users[0].email).toBe(UserData.email)
+        })
+    })
+})
