@@ -8,6 +8,13 @@ export interface UserData {
     role: string
 }
 
+export interface UserDataWithoutRole {
+    firstName: string
+    lastName: string
+    email: string
+    password: string
+}
+
 export interface RegisterUserRequest extends Request {
     body: UserData
 }

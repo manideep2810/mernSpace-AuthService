@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm'
 import { User } from '../entity/User'
-import { UserData } from '../types/index'
+import { UserData, UserDataWithoutRole } from '../types/index'
 import createHttpError from 'http-errors'
 import bcrypt from 'bcrypt'
 
@@ -47,5 +47,21 @@ export class UserService {
     async findById(id: number) {
         const user = await this.userRepository.findOne({ where: { id } })
         return user
+    }
+
+    async getAll() {
+        return await this.userRepository.find({})
+    }
+
+    async getOne(id: number) {
+        return await this.userRepository.findOne({ where: { id: id } })
+    }
+
+    async update(id: number, userData: UserDataWithoutRole) {
+        return await this.userRepository.update(id, userData)
+    }
+
+    async destroy(id: number) {
+        return await this.userRepository.delete(id)
     }
 }
