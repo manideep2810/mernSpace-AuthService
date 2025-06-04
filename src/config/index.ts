@@ -16,6 +16,7 @@ const {
     DB_USERNAME,
     REFRESH_TOKEN_SECRET,
     JWKS_URI,
+    PRIVATE_KEY,
 } = process.env
 
 // console.log(__dirname, `../../.env.${process.env.NODE_ENV}`);
@@ -34,4 +35,5 @@ export const Config = {
     DB_USERNAME,
     REFRESH_TOKEN_SECRET,
     JWKS_URI,
+    PRIVATE_KEY,
 }
