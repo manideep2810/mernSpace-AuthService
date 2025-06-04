@@ -4,6 +4,10 @@ module.exports = {
     testEnvironment: 'node',
     verbose: true,
     collectCoverage: true,
-    coverageProvider: "v8",
-    collectCoverageFrom: ["src/**/*.ts", "!src/tests/**", "!**/node_modules/**"],
+    coverageProvider: 'v8',
+    collectCoverageFrom: [
+        'src/**/*.ts',
+        '!src/tests/**',
+        '!**/node_modules/**',
+    ],
 }
