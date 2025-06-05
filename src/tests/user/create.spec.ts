@@ -5,6 +5,8 @@ import app from '../../app'
 import createJWKMock from 'mock-jwks'
 import { ROLES } from '../../constants'
 import { User } from '../../entity/User'
+import { createTenant } from '../utils'
+import { Tenant } from '../../entity/Tenant'
 
 describe('POST /users', () => {
     let connection: DataSource
@@ -32,6 +34,8 @@ describe('POST /users', () => {
 
     describe('Given all fields', () => {
         it('should persist the user in database', async () => {
+            const tenant = await createTenant(connection.getRepository(Tenant))
+
             const adminToken = jwks.token({
                 sub: '1',
                 role: ROLES.ADMIN,
@@ -42,7 +46,7 @@ describe('POST /users', () => {
                 lastName: 'Doe',
                 email: 'John@gmail.com',
                 password: '12345678',
-                tenantId: 1,
+                tenantId: tenant.id,
             }
 
             await request(app)
@@ -59,6 +63,8 @@ describe('POST /users', () => {
         })
 
         it('should create user of role manager only', async () => {
+            const tenant = await createTenant(connection.getRepository(Tenant))
+
             const adminToken = jwks.token({
                 sub: '1',
                 role: ROLES.ADMIN,
@@ -69,7 +75,7 @@ describe('POST /users', () => {
                 lastName: 'Doe',
                 email: 'John@gmail.com',
                 password: '12345678',
-                tenantId: 1,
+                tenantId: tenant.id,
             }
 
             await request(app)

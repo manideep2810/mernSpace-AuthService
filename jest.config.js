@@ -10,8 +10,5 @@ module.exports = {
         '!src/tests/**',
         '!**/node_modules/**',
     ],
-    testPathIgnorePatterns: [
-        '/node_modules/',
-        '/dist/',
-    ],
+    testPathIgnorePatterns: ['/node_modules/', '/dist/'],
 }
